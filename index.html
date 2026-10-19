@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>三年级近似值奇幻大冒险 | 15题竞技排行榜版</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Nunito', 'Noto Sans SC', sans-serif;
+      background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 50%, #fef3c7 100%);
+      min-height: 100vh;
+      user-select: none;
+    }
+    .card-glass {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border: 3px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 20px 40px -15px rgba(79, 70, 229, 0.18);
+    }
+    .btn-3d {
+      transition: all 0.15s ease;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.18);
+    }
+    .btn-3d:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
+    }
+    .digit-box {
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .pulse-ring {
+      animation: pulseRing 1.5s infinite;
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+    .floating {
+      animation: floatAnim 3s ease-in-out infinite;
+    }
+    @keyframes floatAnim {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+  </style>
+</head>
+<body class="p-3 md:p-6 flex flex-col items-center justify-center">
+
+  <!-- 顶部导航条 -->
+  <header class="w-full max-w-4xl flex flex-wrap items-center justify-between gap-3 mb-5">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-2xl shadow-lg floating">
+        🦖
+      </div>
+      <div>
+        <h1 class="text-lg md:text-2xl font-black text-indigo-950 tracking-tight">
+          近似值奇幻大冒险 <span class="text-xs bg-amber-400 text-amber-950 px-2.5 py-0.5 rounded-full font-extrabold align-middle">三年级 KSSR</span>
+        </h1>
+        <p class="text-xs text-slate-600 font-bold">每关 15 题 · 速度+准确率 100% 竞技 · 各关前 20 名排行榜</p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <button onclick="openLeaderboardModal(currentLevelKey || 'tens')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-300 hover:to-orange-300 text-amber-950 font-black text-xs md:text-sm shadow flex items-center gap-1.5">
+        🏆 <span>Top 20 排行榜</span>
+      </button>
+      <button id="soundToggleBtn" onclick="toggleSound()" class="px-3 py-2 rounded-xl bg-white/90 hover:bg-white text-slate-700 font-bold text-xs md:text-sm shadow border border-slate-200 flex items-center gap-1">
+        <span id="soundIcon">🔊</span> <span class="hidden sm:inline">音效</span>
+      </button>
+      <button onclick="openModal('formulaModal')" class="px-3 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs md:text-sm shadow border border-amber-300 flex items-center gap-1">
+        📖 <span>秘籍</span>
+      </button>
+      <button onclick="openModal('teacherModal')" class="px-3 py-2 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-xs md:text-sm shadow border border-indigo-300 flex items-center gap-1">
+        ⚙️ <span>老师设置</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 主容器 -->
+  <main class="w-full max-w-4xl">
+
+    <!-- ==================== 界面 1：输入学生姓名与班级 ==================== -->
+    <section id="screen-login" class="card-glass rounded-3xl p-6 md:p-10 text-center max-w-xl mx-auto">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-3xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-4xl shadow-xl">
+        🎒
+      </div>
+      <h2 class="text-2xl md:text-3xl font-black text-slate-800 mb-2">小勇士，报上名来！</h2>
+      <p class="text-slate-600 mb-5 text-sm">输入姓名与班级，冲击各关卡 <strong>Top 20 英雄榜</strong>！</p>
+
+      <!-- 计分规则提示卡 -->
+      <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-3.5 mb-5 text-left text-xs text-indigo-950 space-y-1">
+        <div class="font-black text-sm text-indigo-900">⚡ 全新 100% 竞技计分规则（每关 15 题）：</div>
+        <div>• <strong>准确率得分（最高 75%）</strong>：每答对 1 题稳拿 <strong>5%</strong>。</div>
+        <div>• <strong>极速奖励分（最高 25%）</strong>：答对越快，速度奖励越高（单题最高 <strong>+1.67%</strong>）！</div>
+      </div>
+
+      <div class="space-y-4 text-left">
+        <div>
+          <label class="block text-sm font-extrabold text-slate-700 mb-1.5">👤 学生姓名 (Student Name) <span class="text-rose-500">*</span></label>
+          <input id="inputStudentName" type="text" placeholder="例如：陈小明 / Tan Xiao Ming" 
+            class="w-full px-4 py-3.5 rounded-2xl border-2 border-indigo-200 focus:border-indigo-500 focus:outline-none text-lg font-bold text-slate-800 bg-white shadow-inner" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-extrabold text-slate-700 mb-1.5">🏫 班级 (Class) <span class="text-rose-500">*</span></label>
+          <input id="inputStudentClass" type="text" placeholder="例如：3A / 3M / 三红班" 
+            class="w-full px-4 py-3.5 rounded-2xl border-2 border-indigo-200 focus:border-indigo-500 focus:outline-none text-lg font-bold text-slate-800 bg-white shadow-inner" />
+          <div class="flex flex-wrap gap-2 mt-2">
+            <span class="text-xs text-slate-500 self-center">快速选择：</span>
+            <button type="button" onclick="setQuickClass('3A')" class="text-xs bg-slate-100 hover:bg-indigo-100 text-slate-700 px-2.5 py-1 rounded-lg font-bold">3A</button>
+            <button type="button" onclick="setQuickClass('3B')" class="text-xs bg-slate-100 hover:bg-indigo-100 text-slate-700 px-2.5 py-1 rounded-lg font-bold">3B</button>
+            <button type="button" onclick="setQuickClass('3C')" class="text-xs bg-slate-100 hover:bg-indigo-100 text-slate-700 px-2.5 py-1 rounded-lg font-bold">3C</button>
+            <button type="button" onclick="setQuickClass('3M')" class="text-xs bg-slate-100 hover:bg-indigo-100 text-slate-700 px-2.5 py-1 rounded-lg font-bold">3M</button>
+            <button type="button" onclick="setQuickClass('3K')" class="text-xs bg-slate-100 hover:bg-indigo-100 text-slate-700 px-2.5 py-1 rounded-lg font-bold">3K</button>
+          </div>
+        </div>
+
+        <p id="loginError" class="text-rose-600 text-sm font-bold hidden">⚠️ 请先填写完整的学生姓名和班级！</p>
+
+        <button onclick="submitStudentLogin()" class="w-full py-4 mt-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-black text-lg btn-3d">
+          🚀 进入关卡选择地图
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== 界面 2：选择关卡 ==================== -->
+    <section id="screen-levels" class="hidden space-y-5">
+      <!-- 学生信息栏 -->
+      <div class="card-glass rounded-2xl p-4 px-6 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">🧑‍🎓</span>
+          <div>
+            <div class="text-xs text-slate-500 font-bold">当前闯关勇士</div>
+            <div class="text-lg font-black text-indigo-950">
+              <span id="displayStudentName">-</span> 
+              <span id="displayStudentClass" class="ml-2 text-xs bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full font-extrabold">-</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="openLeaderboardModal('tens')" class="px-3.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-black">
+            🏆 查看各关 Top 20 榜
+          </button>
+          <button onclick="switchStudent()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline">
+            🔄 更换学生
+          </button>
+        </div>
+      </div>
+
+      <!-- 关卡网格 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- 关卡 1 -->
+        <div class="card-glass rounded-3xl p-6 border-2 border-emerald-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between">
+              <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-3xl font-black shadow-sm">
+                🏝️
+              </div>
+              <span class="bg-emerald-500 text-white text-xs font-extrabold px-3 py-1 rounded-full">第 1 关 · 15题</span>
+            </div>
+            <h3 class="text-xl font-black text-slate-800 mt-4">十位近似值探险岛</h3>
+            <p class="text-sm text-slate-600 mt-1">找出四位数的<strong>十位近似值</strong>。秘诀：观察<strong>个位数</strong>（0至4舍去，5至9进1）。</p>
+          </div>
+          <div class="mt-5 flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
+            <button onclick="startLevel('tens')" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm btn-3d">
+              开始闯关 ➡️
+            </button>
+            <button onclick="openLeaderboardModal('tens')" class="px-3.5 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-black text-xs">
+              🏆 本关榜
+            </button>
+          </div>
+        </div>
+
+        <!-- 关卡 2 -->
+        <div class="card-glass rounded-3xl p-6 border-2 border-sky-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between">
+              <div class="w-14 h-14 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center text-3xl font-black shadow-sm">
+                ⛰️
+              </div>
+              <span class="bg-sky-500 text-white text-xs font-extrabold px-3 py-1 rounded-full">第 2 关 · 15题</span>
+            </div>
+            <h3 class="text-xl font-black text-slate-800 mt-4">百位近似值神秘谷</h3>
+            <p class="text-sm text-slate-600 mt-1">找出四位数的<strong>百位近似值</strong>。秘诀：观察<strong>十位数</strong>（0至4舍去，5至9进1）。</p>
+          </div>
+          <div class="mt-5 flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
+            <button onclick="startLevel('hundreds')" class="flex-1 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black text-sm btn-3d">
+              开始闯关 ➡️
+            </button>
+            <button onclick="openLeaderboardModal('hundreds')" class="px-3.5 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-black text-xs">
+              🏆 本关榜
+            </button>
+          </div>
+        </div>
+
+        <!-- 关卡 3 -->
+        <div class="card-glass rounded-3xl p-6 border-2 border-amber-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between">
+              <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-3xl font-black shadow-sm">
+                🏰
+              </div>
+              <span class="bg-amber-500 text-white text-xs font-extrabold px-3 py-1 rounded-full">第 3 关 · 15题</span>
+            </div>
+            <h3 class="text-xl font-black text-slate-800 mt-4">千位近似值天空城</h3>
+            <p class="text-sm text-slate-600 mt-1">找出四位数的<strong>千位近似值</strong>。秘诀：观察<strong>百位数</strong>（0至4舍去，5至9进1）。</p>
+          </div>
+          <div class="mt-5 flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
+            <button onclick="startLevel('thousands')" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-amber-950 font-black text-sm btn-3d">
+              开始闯关 ➡️
+            </button>
+            <button onclick="openLeaderboardModal('thousands')" class="px-3.5 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-black text-xs">
+              🏆 本关榜
+            </button>
+          </div>
+        </div>
+
+        <!-- 关卡 4 -->
+        <div class="card-glass rounded-3xl p-6 border-2 border-purple-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between">
+              <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-3xl font-black shadow-sm">
+                👑
+              </div>
+              <span class="bg-purple-600 text-white text-xs font-extrabold px-3 py-1 rounded-full">第 4 关 · 综合15题</span>
+            </div>
+            <h3 class="text-xl font-black text-slate-800 mt-4">全能近似值大宗师</h3>
+            <p class="text-sm text-slate-600 mt-1">随机混合考查<strong>十位、百位、千位近似值</strong>！看清题目要求，眼明手快拿高分！</p>
+          </div>
+          <div class="mt-5 flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
+            <button onclick="startLevel('mixed')" class="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-sm btn-3d">
+              开始闯关 ➡️
+            </button>
+            <button onclick="openLeaderboardModal('mixed')" class="px-3.5 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-black text-xs">
+              🏆 本关榜
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 界面 3：答题闯关界面 (15题 + 实时速度奖励条) ==================== -->
+    <section id="screen-quiz" class="hidden card-glass rounded-3xl p-5 md:p-8">
+      <!-- 顶部状态栏 -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-200">
+        <div class="flex items-center gap-2">
+          <button onclick="confirmBackToLevels()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">
+            ⬅️ 退出
+          </button>
+          <span id="quizLevelBadge" class="px-3 py-1 rounded-xl bg-indigo-100 text-indigo-900 font-extrabold text-xs md:text-sm">
+            第一关：十位近似值
+          </span>
+        </div>
+
+        <div class="flex items-center gap-3 text-xs md:text-sm font-extrabold">
+          <div class="text-slate-600">⏱️ 总用时：<span id="quizTimer" class="text-indigo-700">0.0</span>s</div>
+          <div class="bg-amber-100 text-amber-900 px-3 py-1 rounded-xl">
+            🏆 实时总分：<span id="quizScore">0.0</span>%
+          </div>
+        </div>
+      </div>
+
+      <!-- 关卡进度条 + 本题速度奖励能量条 -->
+      <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <div class="flex justify-between text-xs font-extrabold text-slate-600 mb-1">
+            <span id="questionCounterText">第 1 / 15 题</span>
+            <span id="streakText" class="text-orange-600"></span>
+          </div>
+          <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+            <div id="quizProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-300" style="width: 6.6%"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between text-xs font-extrabold text-slate-600 mb-1">
+            <span>⚡ 本题速度奖励能量（越快答对加分越多）</span>
+            <span id="speedBonusPreview" class="text-emerald-700">+1.67%</span>
+          </div>
+          <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+            <div id="speedBarFill" class="h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 transition-all duration-100" style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 题目主区域 -->
+      <div class="my-5 text-center">
+        <p class="text-base md:text-xl font-extrabold text-slate-700 mb-3">
+          请找出以下数目的 <span id="targetPlaceLabel" class="px-3 py-1 rounded-xl bg-rose-100 text-rose-700 font-black underline decoration-2">十位近似值</span> ：
+        </p>
+
+        <!-- 数位拆解展示卡 -->
+        <div class="flex justify-center gap-2 md:gap-4 my-4" id="digitBoxesContainer"></div>
+
+        <!-- 放大镜提示按钮 -->
+        <button id="hintBtn" onclick="toggleHint()" class="px-4 py-1.5 rounded-full bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-extrabold border border-amber-300 transition">
+          🔍 开启数位放大镜提示
+        </button>
+        <p id="hintExplanation" class="mt-2 text-xs md:text-sm font-bold text-indigo-700 hidden"></p>
+      </div>
+
+      <!-- 4 个选项按钮 -->
+      <div id="optionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 my-5"></div>
+
+      <!-- 答题反馈横幅 -->
+      <div id="feedbackBox" class="hidden rounded-2xl p-4 mb-2 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-left">
+          <div id="feedbackTitle" class="font-black text-base md:text-lg"></div>
+          <div id="feedbackDetail" class="text-xs md:text-sm font-bold mt-0.5"></div>
+        </div>
+        <button id="nextQuestionBtn" onclick="nextQuestion()" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm whitespace-nowrap btn-3d">
+          下一题 ➡️
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== 界面 4：成绩单 + 本关 Top 20 排行榜 ==================== -->
+    <section id="screen-result" class="hidden card-glass rounded-3xl p-5 md:p-8 text-center">
+      <div id="resultTrophy" class="text-5xl md:text-6xl mb-2">🏆</div>
+      <h2 class="text-2xl md:text-3xl font-black text-slate-800">闯关完成！竞技成绩单</h2>
+      <p id="resultPraise" class="text-slate-600 font-bold text-sm mt-1">太棒了，来看看你在排行榜上的名次吧！</p>
+
+      <!-- Google Sheet 上传状态横幅 -->
+      <div id="sheetSyncBanner" class="mt-3 mx-auto max-w-xl rounded-2xl px-4 py-2.5 text-xs md:text-sm font-extrabold flex items-center justify-center gap-2 bg-amber-50 border-2 border-amber-300 text-amber-900">
+        <span id="sheetSyncIcon">⏳</span>
+        <span id="sheetSyncText">正在同步成绩并更新云端 Top 20 排行榜...</span>
+        <button id="retrySyncBtn" onclick="uploadScoreAndRefreshLeaderboard()" class="hidden ml-2 underline text-indigo-700">重试同步</button>
+      </div>
+
+      <!-- 核心成绩指标卡片 -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 my-5 text-left">
+        <div class="bg-indigo-50 p-3.5 rounded-2xl border border-indigo-100">
+          <div class="text-xs text-slate-500 font-bold">学生姓名 (班级)</div>
+          <div id="resStudentInfo" class="text-sm md:text-base font-black text-indigo-950 truncate">-</div>
+        </div>
+        <div class="bg-amber-50 p-3.5 rounded-2xl border-2 border-amber-300">
+          <div class="text-xs text-amber-800 font-bold">🏆 综合总分 (满分100%)</div>
+          <div id="resTotalScore" class="text-xl md:text-2xl font-black text-amber-900">-</div>
+        </div>
+        <div class="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-100">
+          <div class="text-xs text-slate-500 font-bold">🎯 准确率分 (最高75%)</div>
+          <div id="resAccuracyDetail" class="text-sm md:text-base font-black text-emerald-950">-</div>
+        </div>
+        <div class="bg-purple-50 p-3.5 rounded-2xl border border-purple-100">
+          <div class="text-xs text-slate-500 font-bold">⚡ 速度奖励分 (最高25%)</div>
+          <div id="resSpeedDetail" class="text-sm md:text-base font-black text-purple-950">-</div>
+        </div>
+      </div>
+
+      <!-- 本关 Top 20 排行榜直接展示区 -->
+      <div class="text-left my-6 bg-gradient-to-b from-amber-50/80 to-white rounded-3xl p-4 md:p-6 border-2 border-amber-200 shadow-inner">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div>
+            <h3 class="text-base md:text-lg font-black text-amber-950 flex items-center gap-2">
+              👑 <span id="resultLeaderboardTitle">本关 Top 20 英雄排行榜</span>
+            </h3>
+            <p id="myRankSummary" class="text-xs font-extrabold text-indigo-700 mt-0.5"></p>
+          </div>
+          <button onclick="fetchCloudLeaderboards(true)" class="px-3 py-1.5 rounded-xl bg-amber-200/80 hover:bg-amber-300 text-amber-950 text-xs font-black">
+            🔄 刷新排行
+          </button>
+        </div>
+
+        <div class="overflow-x-auto rounded-2xl border border-amber-200 bg-white max-h-80">
+          <table class="w-full text-left border-collapse text-xs md:text-sm">
+            <thead class="sticky top-0 bg-amber-100 text-amber-950 font-extrabold border-b border-amber-200">
+              <tr>
+                <th class="p-2.5 w-16 text-center">名次</th>
+                <th class="p-2.5">学生姓名</th>
+                <th class="p-2.5">班级</th>
+                <th class="p-2.5">总分 (100%)</th>
+                <th class="p-2.5">答对题数</th>
+                <th class="p-2.5">总用时</th>
+              </tr>
+            </thead>
+            <tbody id="resultLeaderboardBody" class="divide-y divide-slate-100 font-bold"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 15 题作答明细折叠/展开区 -->
+      <div class="text-left my-5">
+        <h3 class="text-sm md:text-base font-black text-slate-800 mb-2">📋 本局 15 题作答详情（含单题用时与得分）：</h3>
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white max-h-64">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead class="sticky top-0 bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200">
+              <tr>
+                <th class="p-2.5">题号</th>
+                <th class="p-2.5">题目要求</th>
+                <th class="p-2.5">你的答案</th>
+                <th class="p-2.5">正确答案</th>
+                <th class="p-2.5">用时</th>
+                <th class="p-2.5">本题得分</th>
+              </tr>
+            </thead>
+            <tbody id="reviewTableBody" class="divide-y divide-slate-100 font-bold"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 底部操作按钮 -->
+      <div class="flex flex-wrap justify-center gap-3 mt-6">
+        <button onclick="replaySameLevel()" class="px-6 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm btn-3d">
+          🔄 再挑战一次冲击更高排名
+        </button>
+        <button onclick="backToLevelMap()" class="px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm btn-3d">
+          🗺️ 选择其他关卡
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== 模态框 1：四关独立 Top 20 英雄排行榜 ==================== -->
+  <div id="leaderboardModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 md:p-4 z-50">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-5 md:p-7 shadow-2xl border-4 border-amber-300 max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center mb-3">
+        <div>
+          <h3 class="text-xl md:text-2xl font-black text-amber-950">🏆 各关卡 Top 20 英雄排行榜</h3>
+          <p class="text-xs text-slate-500 font-bold">按综合总分（准确率75% + 速度25%）排名，同分以用时更短者优先</p>
+        </div>
+        <button onclick="closeModal('leaderboardModal')" class="text-slate-400 hover:text-slate-700 text-xl font-black">✖</button>
+      </div>
+
+      <!-- 4 个关卡切换标签 -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+        <button id="lbTab-tens" onclick="switchLeaderboardTab('tens')" class="py-2 px-3 rounded-xl font-black text-xs border-2 transition">
+          🏝️ 十位探险岛
+        </button>
+        <button id="lbTab-hundreds" onclick="switchLeaderboardTab('hundreds')" class="py-2 px-3 rounded-xl font-black text-xs border-2 transition">
+          ⛰️ 百位神秘谷
+        </button>
+        <button id="lbTab-thousands" onclick="switchLeaderboardTab('thousands')" class="py-2 px-3 rounded-xl font-black text-xs border-2 transition">
+          🏰 千位天空城
+        </button>
+        <button id="lbTab-mixed" onclick="switchLeaderboardTab('mixed')" class="py-2 px-3 rounded-xl font-black text-xs border-2 transition">
+          👑 全能大宗师
+        </button>
+      </div>
+
+      <div class="flex justify-between items-center mb-2 text-xs">
+        <span id="lbSourceStatus" class="font-bold text-slate-600">📊 排行榜数据状态</span>
+        <button onclick="fetchCloudLeaderboards(true)" class="px-3 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-extrabold">
+          🔄 立即同步最新云端榜
+        </button>
+      </div>
+
+      <!-- 排行榜表格主体 -->
+      <div class="overflow-y-auto flex-1 rounded-2xl border border-slate-200">
+        <table class="w-full text-left border-collapse text-xs md:text-sm">
+          <thead class="sticky top-0 bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200">
+            <tr>
+              <th class="p-3 w-16 text-center">排名</th>
+              <th class="p-3">学生姓名</th>
+              <th class="p-3">班级</th>
+              <th class="p-3">综合总分</th>
+              <th class="p-3">答对题数</th>
+              <th class="p-3">总用时</th>
+            </tr>
+          </thead>
+          <tbody id="modalLeaderboardBody" class="divide-y divide-slate-100 font-bold"></tbody>
+        </table>
+      </div>
+
+      <button onclick="closeModal('leaderboardModal')" class="mt-4 w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-black text-sm">
+        关闭排行榜
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== 模态框 2：四舍五入秘籍 ==================== -->
+  <div id="formulaModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border-4 border-amber-300">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-black text-amber-900">📖 智智小恐龙的四舍五入秘籍</h3>
+        <button onclick="closeModal('formulaModal')" class="text-slate-400 hover:text-slate-700 text-xl font-black">✖</button>
+      </div>
+      <div class="space-y-3 text-sm text-slate-700 font-medium">
+        <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200">
+          <div class="font-black text-emerald-900 mb-1">1️⃣ 找准“关键观察位”（右手边邻居）</div>
+          <ul class="list-disc list-inside space-y-1 text-xs md:text-sm">
+            <li>求<strong>十位近似值</strong> ➡️ 看<strong>个位</strong></li>
+            <li>求<strong>百位近似值</strong> ➡️ 看<strong>十位</strong></li>
+            <li>求<strong>千位近似值</strong> ➡️ 看<strong>百位</strong></li>
+          </ul>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200">
+          <div class="font-black text-amber-900 mb-1">2️⃣ 四舍五入小口诀</div>
+          <p class="text-xs md:text-sm">
+            • <strong>四舍（0、1、2、3、4）</strong>：直接舍去变成 0，前面的数字保持不变。<br/>
+            • <strong>五入（5、6、7、8、9）</strong>：向前一位<strong>进 1</strong>，自己和后面的数位全部变成 0。
+          </p>
+        </div>
+      </div>
+      <button onclick="closeModal('formulaModal')" class="mt-6 w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-amber-950 font-black">
+        我学会啦！关闭窗口
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== 模态框 3：老师设置 (Google Sheet 链接配置与本地导出) ==================== -->
+  <div id="teacherModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 md:p-8 shadow-2xl border-4 border-indigo-200 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-black text-indigo-950">⚙️ 老师后台设置 & 云端排行榜连接</h3>
+        <button onclick="closeModal('teacherModal')" class="text-slate-400 hover:text-slate-700 text-xl font-black">✖</button>
+      </div>
+
+      <div class="space-y-4 text-sm">
+        <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-200">
+          <label class="block font-black text-indigo-950 mb-1">🔗 Google Apps Script 网页应用网址 (Web App URL)：</label>
+          <p class="text-xs text-slate-600 mb-2">
+            粘贴部署好的 Google Apps Script 网址后，游戏不仅能自动把成绩收入 Google Sheet，还能实时拉取全班各关卡的 <strong>Top 20 排行榜</strong>！
+          </p>
+          <input id="inputScriptUrl" type="url" placeholder="https://script.google.com/macros/s/xxxxxx/exec"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-indigo-300 font-mono text-xs bg-white focus:outline-none focus:border-indigo-600" />
+          <div class="flex flex-wrap gap-2 mt-3">
+            <button onclick="saveScriptUrl()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs">
+              💾 保存网址并同步排行榜
+            </button>
+            <button onclick="exportLocalCSV()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs">
+              📥 导出本机记录 (CSV)
+            </button>
+            <button onclick="clearLocalRecords()" class="px-4 py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold text-xs">
+              🗑️ 清空本机缓存
+            </button>
+          </div>
+          <p id="scriptSaveMsg" class="text-xs font-bold mt-2 hidden"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================================
+    // 【老师专属配置】将部署好的 Google Apps Script 网址填入下方引号内：
+    // 填入后发布到 GitHub Pages 或 Google Sites，全班学生即可共享实时 Top 20 排行榜！
+    // ============================================================================
+    const DEFAULT_GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeaJTzwsDMb6-kodufTTCwweS31bcNf_Fzy9EYuF12bm8mhm30LhX1QBr393wKfAL2/exec";
+
+    const TOTAL_QUESTIONS = 15;
+    const BASE_SCORE_PER_Q = 75 / TOTAL_QUESTIONS; // 每题准确率基础分 = 5.0%
+    const MAX_SPEED_PER_Q = 25 / TOTAL_QUESTIONS;  // 每题满分速度奖励 = 1.6667%
+    const FULL_SPEED_SECONDS = 3.0;                // 3秒内作答拿满速度分
+    const ZERO_SPEED_SECONDS = 15.0;               // 超过15秒拿保底速度分
+
+    let studentName = "";
+    let studentClass = "";
+    let currentLevelKey = "tens";
+    let activeModalLeaderboardTab = "tens";
+    let questions = [];
+    let currentIndex = 0;
+    let totalScore = 0;
+    let totalAccuracyScore = 0;
+    let totalSpeedScore = 0;
+    let streak = 0;
+    let soundEnabled = true;
+    let showHint = false;
+
+    // 计时器状态
+    let totalElapsedMs = 0;
+    let questionStartMs = 0;
+    let quizTimerInterval = null;
+    let questionAnswered = false;
+    let lastCompletedRecord = null;
+
+    // 云端排行榜缓存（按4个关卡分类）
+    let cloudLeaderboards = {
+      tens: [],
+      hundreds: [],
+      thousands: [],
+      mixed: []
+    };
+
+    const LEVEL_CONFIG = {
+      tens: {
+        key: "tens",
+        name: "第一关：十位近似值",
+        shortName: "十位探险岛",
+        divisor: 10,
+        targetName: "十位近似值",
+        targetIdx: 2,
+        decideIdx: 3,
+        decideName: "个位"
+      },
+      hundreds: {
+        key: "hundreds",
+        name: "第二关：百位近似值",
+        shortName: "百位神秘谷",
+        divisor: 100,
+        targetName: "百位近似值",
+        targetIdx: 1,
+        decideIdx: 2,
+        decideName: "十位"
+      },
+      thousands: {
+        key: "thousands",
+        name: "第三关：千位近似值",
+        shortName: "千位天空城",
+        divisor: 1000,
+        targetName: "千位近似值",
+        targetIdx: 0,
+        decideIdx: 1,
+        decideName: "百位"
+      },
+      mixed: {
+        key: "mixed",
+        name: "第四关：全能大宗师",
+        shortName: "全能大宗师",
+        divisor: null
+      }
+    };
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedUrl = localStorage.getItem("rounding_game_script_url") || DEFAULT_GOOGLE_SCRIPT_URL;
+      document.getElementById("inputScriptUrl").value = savedUrl;
+      fetchCloudLeaderboards(false);
+    });
+
+    function getActiveScriptUrl() {
+      return (localStorage.getItem("rounding_game_script_url") || DEFAULT_GOOGLE_SCRIPT_URL || "").trim();
+    }
+
+    // ==================== Web Audio 音效 ====================
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function playTone(freq, type = "sine", duration = 0.15, delay = 0) {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new AudioCtx();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+        gain.gain.setValueAtTime(0.16, audioCtx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + delay);
+        osc.stop(audioCtx.currentTime + delay + duration);
+      } catch (e) {}
+    }
+
+    function playSoundCorrect() {
+      playTone(523.25, "triangle", 0.1, 0);
+      playTone(659.25, "triangle", 0.1, 0.08);
+      playTone(783.99, "triangle", 0.22, 0.16);
+    }
+
+    function playSoundWrong() {
+      playTone(300, "sawtooth", 0.16, 0);
+      playTone(220, "sawtooth", 0.25, 0.14);
+    }
+
+    function playSoundVictory() {
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => {
+        playTone(f, "triangle", 0.2, idx * 0.11);
+      });
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById("soundIcon").textContent = soundEnabled ? "🔊" : "🔇";
+    }
+
+    // ==================== 登录与界面切换 ====================
+    function setQuickClass(cls) {
+      document.getElementById("inputStudentClass").value = cls;
+    }
+
+    function submitStudentLogin() {
+      const nameVal = document.getElementById("inputStudentName").value.trim();
+      const classVal = document.getElementById("inputStudentClass").value.trim();
+      const errEl = document.getElementById("loginError");
+
+      if (!nameVal || !classVal) {
+        errEl.classList.remove("hidden");
+        playSoundWrong();
+        return;
+      }
+      errEl.classList.add("hidden");
+      studentName = nameVal;
+      studentClass = classVal;
+
+      document.getElementById("displayStudentName").textContent = studentName;
+      document.getElementById("displayStudentClass").textContent = studentClass;
+
+      playSoundCorrect();
+      showScreen("screen-levels");
+    }
+
+    function switchStudent() {
+      showScreen("screen-login");
+    }
+
+    function showScreen(screenId) {
+      ["screen-login", "screen-levels", "screen-quiz", "screen-result"].forEach(id => {
+        document.getElementById(id).classList.add("hidden");
+      });
+      document.getElementById(screenId).classList.remove("hidden");
+    }
+
+    // ==================== 15 题随机生成器 ====================
+    function generateQuestionsForLevel(levelKey) {
+      const pool = [];
+      const usedNumbers = new Set();
+      const subTypes = ["tens", "hundreds", "thousands"];
+
+      for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+        const activeType = levelKey === "mixed" ? subTypes[i % 3] : levelKey;
+        const cfg = LEVEL_CONFIG[activeType];
+
+        let num;
+        do {
+          num = Math.floor(Math.random() * 8900) + 1000;
+          // 让前几题或部分题目特意包含边界值 4、5 或进位 9
+          if (i % 4 === 1) {
+            const boundaryDigit = Math.random() < 0.5 ? 4 : 5;
+            const digitsArr = String(num).padStart(4, "0").split("");
+            digitsArr[cfg.decideIdx] = String(boundaryDigit);
+            num = Number(digitsArr.join(""));
+          }
+        } while (usedNumbers.has(num) || num < 1000);
+        usedNumbers.add(num);
+
+        const correctAns = Math.round(num / cfg.divisor) * cfg.divisor;
+        const floorAns = Math.floor(num / cfg.divisor) * cfg.divisor;
+        const ceilAns = floorAns + cfg.divisor;
+        const oppositeAns = (correctAns === floorAns) ? ceilAns : floorAns;
+
+        const distractorSet = new Set([correctAns, oppositeAns]);
+        distractorSet.add(correctAns + cfg.divisor);
+        if (correctAns - cfg.divisor >= 1000) distractorSet.add(correctAns - cfg.divisor);
+        distractorSet.add(Math.round(num / 10) * 10);
+        distractorSet.add(Math.round(num / 100) * 100);
+        distractorSet.add(Math.round(num / 1000) * 1000);
+        if (cfg.divisor >= 100) {
+          distractorSet.add(correctAns + (num % 10));
+        }
+
+        while (distractorSet.size < 4) {
+          const offset = (Math.floor(Math.random() * 5) - 2) * cfg.divisor;
+          const candidate = Math.max(1000, correctAns + offset);
+          distractorSet.add(candidate);
+        }
+
+        const options = Array.from(distractorSet).slice(0, 4);
+        for (let j = options.length - 1; j > 0; j--) {
+          const k = Math.floor(Math.random() * (j + 1));
+          [options[j], options[k]] = [options[k], options[j]];
+        }
+
+        const digits = String(num).padStart(4, "0").split("").map(Number);
+        const decideDigit = digits[cfg.decideIdx];
+        const isRoundUp = decideDigit >= 5;
+
+        pool.push({
+          index: i + 1,
+          number: num,
+          digits,
+          typeKey: activeType,
+          targetName: cfg.targetName,
+          targetIdx: cfg.targetIdx,
+          decideIdx: cfg.decideIdx,
+          decideName: cfg.decideName,
+          decideDigit,
+          isRoundUp,
+          correctAnswer: correctAns,
+          options,
+          userAnswer: null,
+          isCorrect: false,
+          timeTakenSec: 0,
+          earnedPoints: 0,
+          earnedSpeedPoints: 0
+        });
+      }
+      return pool;
+    }
+
+    // ==================== 速度奖励计算函数 ====================
+    function calculateSpeedBonus(elapsedSeconds) {
+      if (elapsedSeconds <= FULL_SPEED_SECONDS) {
+        return MAX_SPEED_PER_Q;
+      }
+      if (elapsedSeconds >= ZERO_SPEED_SECONDS) {
+        return 0.25; // 超时仍给少量鼓励分
+      }
+      const ratio = 1 - ((elapsedSeconds - FULL_SPEED_SECONDS) / (ZERO_SPEED_SECONDS - FULL_SPEED_SECONDS));
+      return 0.25 + ratio * (MAX_SPEED_PER_Q - 0.25);
+    }
+
+    // ==================== 开始关卡与实时计时 ====================
+    function startLevel(levelKey) {
+      currentLevelKey = levelKey;
+      questions = generateQuestionsForLevel(levelKey);
+      currentIndex = 0;
+      totalScore = 0;
+      totalAccuracyScore = 0;
+      totalSpeedScore = 0;
+      streak = 0;
+      showHint = false;
+      totalElapsedMs = 0;
+
+      document.getElementById("quizLevelBadge").textContent = LEVEL_CONFIG[levelKey].name;
+      document.getElementById("quizScore").textContent = "0.0";
+      document.getElementById("quizTimer").textContent = "0.0";
+
+      showScreen("screen-quiz");
+      renderCurrentQuestion();
+
+      if (quizTimerInterval) clearInterval(quizTimerInterval);
+      quizTimerInterval = setInterval(updateLiveTimers, 100);
+    }
+
+    function updateLiveTimers() {
+      if (questionAnswered) return;
+      const now = performance.now();
+      const qElapsedSec = (now - questionStartMs) / 1000;
+      const currentTotalSec = (totalElapsedMs + (now - questionStartMs)) / 1000;
+
+      document.getElementById("quizTimer").textContent = currentTotalSec.toFixed(1);
+
+      // 更新速度奖励能量条
+      const liveSpeedBonus = calculateSpeedBonus(qElapsedSec);
+      const pct = Math.max(12, Math.min(100, (liveSpeedBonus / MAX_SPEED_PER_Q) * 100));
+      document.getElementById("speedBarFill").style.width = `${pct}%`;
+      document.getElementById("speedBonusPreview").textContent = `+${liveSpeedBonus.toFixed(2)}%`;
+    }
+
+    function renderCurrentQuestion() {
+      const q = questions[currentIndex];
+      showHint = false;
+      questionAnswered = false;
+      questionStartMs = performance.now();
+
+      document.getElementById("questionCounterText").textContent = `第 ${currentIndex + 1} / ${TOTAL_QUESTIONS} 题`;
+      document.getElementById("quizProgressBar").style.width = `${((currentIndex + 1) / TOTAL_QUESTIONS) * 100}%`;
+      document.getElementById("streakText").textContent = streak >= 2 ? `🔥 连对 ${streak} 题！` : "";
+      document.getElementById("targetPlaceLabel").textContent = q.targetName;
+
+      document.getElementById("feedbackBox").classList.add("hidden");
+      document.getElementById("hintExplanation").classList.add("hidden");
+      document.getElementById("hintBtn").textContent = "🔍 开启数位放大镜提示";
+
+      renderDigitBoxes(q);
+
+      const grid = document.getElementById("optionsGrid");
+      grid.innerHTML = "";
+      q.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn py-4 px-6 rounded-2xl bg-white hover:bg-indigo-50 border-2 border-indigo-200 text-2xl md:text-3xl font-black text-slate-800 btn-3d";
+        btn.textContent = opt.toLocaleString();
+        btn.onclick = () => selectAnswer(opt, btn);
+        grid.appendChild(btn);
+      });
+    }
+
+    function renderDigitBoxes(q) {
+      const placeNames = ["千位", "百位", "十位", "个位"];
+      const colors = [
+        "bg-purple-100 border-purple-300 text-purple-900",
+        "bg-amber-100 border-amber-300 text-amber-900",
+        "bg-sky-100 border-sky-300 text-sky-900",
+        "bg-emerald-100 border-emerald-300 text-emerald-900"
+      ];
+
+      const container = document.getElementById("digitBoxesContainer");
+      container.innerHTML = "";
+
+      q.digits.forEach((d, idx) => {
+        const isTarget = showHint && idx === q.targetIdx;
+        const isDecide = showHint && idx === q.decideIdx;
+
+        const box = document.createElement("div");
+        box.className = `digit-box w-16 md:w-20 py-3 rounded-2xl border-2 flex flex-col items-center justify-center relative ${colors[idx]} ${isDecide ? "pulse-ring ring-4 ring-rose-400" : ""} ${isTarget ? "ring-4 ring-indigo-500" : ""}`;
+
+        let badgeHtml = "";
+        if (isTarget) {
+          badgeHtml = `<span class="absolute -top-3 bg-indigo-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">近似位</span>`;
+        } else if (isDecide) {
+          badgeHtml = `<span class="absolute -top-3 bg-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">看这位!</span>`;
+        }
+
+        box.innerHTML = `
+          ${badgeHtml}
+          <span class="text-xs font-extrabold opacity-75">${placeNames[idx]}</span>
+          <span class="text-3xl md:text-4xl font-black mt-0.5">${d}</span>
+        `;
+        container.appendChild(box);
+      });
+    }
+
+    function toggleHint() {
+      const q = questions[currentIndex];
+      showHint = !showHint;
+      renderDigitBoxes(q);
+
+      const hintExp = document.getElementById("hintExplanation");
+      const hintBtn = document.getElementById("hintBtn");
+      if (showHint) {
+        hintBtn.textContent = "🙈 隐藏数位提示";
+        hintExp.textContent = `💡 提示：求【${q.targetName}】，要观察右边的【${q.decideName}】（数字是 ${q.decideDigit}）。`;
+        hintExp.classList.remove("hidden");
+      } else {
+        hintBtn.textContent = "🔍 开启数位放大镜提示";
+        hintExp.classList.add("hidden");
+      }
+    }
+
+    function selectAnswer(chosenValue, btnElement) {
+      const q = questions[currentIndex];
+      if (questionAnswered) return;
+      questionAnswered = true;
+
+      const elapsedMs = performance.now() - questionStartMs;
+      totalElapsedMs += elapsedMs;
+      const elapsedSec = Math.max(0.3, elapsedMs / 1000);
+
+      q.userAnswer = chosenValue;
+      q.isCorrect = (chosenValue === q.correctAnswer);
+      q.timeTakenSec = Number(elapsedSec.toFixed(1));
+
+      const allBtns = document.querySelectorAll(".option-btn");
+      allBtns.forEach(btn => {
+        btn.disabled = true;
+        const val = Number(btn.textContent.replace(/,/g, ""));
+        if (val === q.correctAnswer) {
+          btn.className = "option-btn py-4 px-6 rounded-2xl bg-emerald-500 border-2 border-emerald-600 text-2xl md:text-3xl font-black text-white shadow-lg";
+        } else if (btn === btnElement && !q.isCorrect) {
+          btn.className = "option-btn py-4 px-6 rounded-2xl bg-rose-500 border-2 border-rose-600 text-2xl md:text-3xl font-black text-white";
+        } else {
+          btn.classList.add("opacity-50");
+        }
+      });
+
+      showHint = true;
+      renderDigitBoxes(q);
+
+      const fbBox = document.getElementById("feedbackBox");
+      const fbTitle = document.getElementById("feedbackTitle");
+      const fbDetail = document.getElementById("feedbackDetail");
+      const nextBtn = document.getElementById("nextQuestionBtn");
+
+      const ruleExplain = `${q.number} 的${q.decideName}是 ${q.decideDigit}（${q.isRoundUp ? "满5进1" : "小于5舍去"}），${q.targetName}是 ${q.correctAnswer}。`;
+
+      if (q.isCorrect) {
+        const spBonus = calculateSpeedBonus(elapsedSec);
+        const qTotal = BASE_SCORE_PER_Q + spBonus;
+
+        q.earnedSpeedPoints = spBonus;
+        q.earnedPoints = qTotal;
+
+        totalAccuracyScore += BASE_SCORE_PER_Q;
+        totalSpeedScore += spBonus;
+        totalScore = Math.min(100, totalAccuracyScore + totalSpeedScore);
+        streak++;
+
+        playSoundCorrect();
+        document.getElementById("quizScore").textContent = totalScore.toFixed(1);
+
+        fbBox.className = "rounded-2xl p-4 mb-2 flex flex-col sm:flex-row items-center justify-between gap-4 bg-emerald-100 border-2 border-emerald-300 text-emerald-950";
+        fbTitle.textContent = `✅ 回答正确！本题用时 ${q.timeTakenSec}秒，得 +${qTotal.toFixed(2)}% (准确5% + 速度${spBonus.toFixed(2)}%)`;
+        fbDetail.textContent = ruleExplain;
+      } else {
+        q.earnedSpeedPoints = 0;
+        q.earnedPoints = 0;
+        streak = 0;
+        playSoundWrong();
+
+        fbBox.className = "rounded-2xl p-4 mb-2 flex flex-col sm:flex-row items-center justify-between gap-4 bg-rose-100 border-2 border-rose-300 text-rose-950";
+        fbTitle.textContent = `❌ 答错啦！正确答案是 ${q.correctAnswer} (本题 +0%)`;
+        fbDetail.textContent = ruleExplain;
+      }
+
+      document.getElementById("streakText").textContent = streak >= 2 ? `🔥 连对 ${streak} 题！` : "";
+      nextBtn.textContent = (currentIndex === TOTAL_QUESTIONS - 1) ? "🏆 查看成绩与排行榜" : "下一题 ➡️";
+      fbBox.classList.remove("hidden");
+    }
+
+    function nextQuestion() {
+      if (currentIndex < TOTAL_QUESTIONS - 1) {
+        currentIndex++;
+        renderCurrentQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    function confirmBackToLevels() {
+      if (confirm("确定要退出当前关卡吗？当前进度将不会计入排行榜。")) {
+        if (quizTimerInterval) clearInterval(quizTimerInterval);
+        showScreen("screen-levels");
+      }
+    }
+
+    // ==================== 结算、排行榜合并与 Google Sheet 同步 ====================
+    function finishQuiz() {
+      if (quizTimerInterval) clearInterval(quizTimerInterval);
+      playSoundVictory();
+
+      const finalScoreNum = Number(Math.min(100, totalScore).toFixed(1));
+      const finalAccNum = Number(totalAccuracyScore.toFixed(1));
+      const finalSpeedNum = Number(totalSpeedScore.toFixed(1));
+      const finalTimeSec = Number((totalElapsedMs / 1000).toFixed(1));
+      const correctCount = questions.filter(q => q.isCorrect).length;
+
+      if (finalScoreNum >= 75 && typeof confetti === "function") {
+        confetti({ particleCount: 100, spread: 75, origin: { y: 0.6 } });
+      }
+
+      const wrongDetails = questions
+        .filter(q => !q.isCorrect)
+        .map(q => `${q.number}(${q.targetName}:误${q.userAnswer}/正${q.correctAnswer})`)
+        .join("；") || "15题全对";
+
+      const nowStr = new Date().toLocaleString("zh-MY", { hour12: false });
+
+      lastCompletedRecord = {
+        timestamp: nowStr,
+        studentName,
+        studentClass,
+        levelKey: currentLevelKey,
+        levelName: LEVEL_CONFIG[currentLevelKey].name,
+        score: finalScoreNum,
+        accuracyScore: finalAccNum,
+        speedScore: finalSpeedNum,
+        correctCount: `${correctCount} / ${TOTAL_QUESTIONS}`,
+        timeSeconds: finalTimeSec,
+        wrongDetails
+      };
+
+      saveRecordLocally(lastCompletedRecord);
+
+      // 填充结算卡片
+      document.getElementById("resStudentInfo").textContent = `${studentName} (${studentClass})`;
+      document.getElementById("resTotalScore").textContent = `${finalScoreNum}%`;
+      document.getElementById("resAccuracyDetail").textContent = `${finalAccNum}% (${correctCount}/15题)`;
+      document.getElementById("resSpeedDetail").textContent = `+${finalSpeedNum}% (${finalTimeSec}秒)`;
+      document.getElementById("resultLeaderboardTitle").textContent = `${LEVEL_CONFIG[currentLevelKey].name} · Top 20 英雄榜`;
+
+      // 渲染 15 题回顾表
+      const tbody = document.getElementById("reviewTableBody");
+      tbody.innerHTML = "";
+      questions.forEach(q => {
+        const tr = document.createElement("tr");
+        tr.className = q.isCorrect ? "bg-emerald-50/40" : "bg-rose-50/70";
+        tr.innerHTML = `
+          <td class="p-2.5">第 ${q.index} 题</td>
+          <td class="p-2.5">${q.number} 的<span class="underline">${q.targetName}</span></td>
+          <td class="p-2.5 ${q.isCorrect ? 'text-emerald-700' : 'text-rose-600 line-through'}">${q.userAnswer}</td>
+          <td class="p-2.5 text-indigo-900">${q.correctAnswer}</td>
+          <td class="p-2.5 text-slate-600">${q.timeTakenSec}s</td>
+          <td class="p-2.5 font-black ${q.isCorrect ? 'text-emerald-700' : 'text-rose-600'}">+${q.earnedPoints.toFixed(2)}%</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      showScreen("screen-result");
+
+      // 先用本机+缓存数据立即渲染一次排行榜，再上传并拉取云端最新榜
+      renderResultLeaderboard();
+      uploadScoreAndRefreshLeaderboard();
+    }
+
+    // 合并云端记录与本地记录，计算指定关卡的 Top 20（同名同班同关卡取最高分）
+    function getTop20ForLevel(levelKey) {
+      const localList = JSON.parse(localStorage.getItem("rounding_game_records") || "[]")
+        .filter(r => r.levelKey === levelKey || r.levelName === LEVEL_CONFIG[levelKey].name);
+      const cloudList = cloudLeaderboards[levelKey] || [];
+
+      const combined = [...cloudList, ...localList];
+      const bestByStudent = new Map();
+
+      combined.forEach(item => {
+        const key = `${(item.studentName || "").trim().toLowerCase()}__${(item.studentClass || "").trim().toLowerCase()}`;
+        if (!key || key === "__") return;
+        const existing = bestByStudent.get(key);
+        const itemScore = Number(item.score) || 0;
+        const itemTime = Number(item.timeSeconds) || 9999;
+
+        if (!existing) {
+          bestByStudent.set(key, item);
+        } else {
+          const exScore = Number(existing.score) || 0;
+          const exTime = Number(existing.timeSeconds) || 9999;
+          if (itemScore > exScore || (itemScore === exScore && itemTime < exTime)) {
+            bestByStudent.set(key, item);
+          }
+        }
+      });
+
+      const sorted = Array.from(bestByStudent.values()).sort((a, b) => {
+        const scoreDiff = (Number(b.score) || 0) - (Number(a.score) || 0);
+        if (Math.abs(scoreDiff) > 0.001) return scoreDiff;
+        return (Number(a.timeSeconds) || 9999) - (Number(b.timeSeconds) || 9999);
+      });
+
+      return sorted.slice(0, 20);
+    }
+
+    function formatRankBadge(rank) {
+      if (rank === 1) return "🥇 1";
+      if (rank === 2) return "🥈 2";
+      if (rank === 3) return "🥉 3";
+      return `${rank}`;
+    }
+
+    function renderResultLeaderboard() {
+      const top20 = getTop20ForLevel(currentLevelKey);
+      const tbody = document.getElementById("resultLeaderboardBody");
+      const rankSummary = document.getElementById("myRankSummary");
+      tbody.innerHTML = "";
+
+      let myRank = -1;
+      top20.forEach((row, idx) => {
+        const isMe = row.studentName.trim().toLowerCase() === studentName.trim().toLowerCase() &&
+                     row.studentClass.trim().toLowerCase() === studentClass.trim().toLowerCase();
+        if (isMe) myRank = idx + 1;
+
+        const tr = document.createElement("tr");
+        tr.className = isMe
+          ? "bg-amber-100/90 text-indigo-950 ring-2 ring-amber-400"
+          : (idx < 3 ? "bg-amber-50/40" : "");
+
+        tr.innerHTML = `
+          <td class="p-2.5 text-center font-black">${formatRankBadge(idx + 1)}</td>
+          <td class="p-2.5 font-black">
+            ${row.studentName}
+            ${isMe ? '<span class="ml-1 text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full">🌟 你</span>' : ''}
+          </td>
+          <td class="p-2.5">${row.studentClass}</td>
+          <td class="p-2.5 font-black text-amber-900">${Number(row.score).toFixed(1)}%</td>
+          <td class="p-2.5 text-emerald-700">${row.correctCount || '-'}</td>
+          <td class="p-2.5 text-slate-600">${Number(row.timeSeconds).toFixed(1)}s</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (myRank !== -1) {
+        rankSummary.textContent = `🎉 恭喜！你目前位居本关排行榜【第 ${myRank} 名】（前 20 强）！`;
+      } else {
+        rankSummary.textContent = `💪 继续加油！再挑战一次提高准确率与速度，即可冲进本关前 20 名！`;
+      }
+    }
+
+    // 打开独立 Top 20 排行榜弹窗
+    function openLeaderboardModal(levelKey) {
+      activeModalLeaderboardTab = levelKey || "tens";
+      openModal("leaderboardModal");
+      switchLeaderboardTab(activeModalLeaderboardTab);
+      fetchCloudLeaderboards(false);
+    }
+
+    function switchLeaderboardTab(levelKey) {
+      activeModalLeaderboardTab = levelKey;
+      ["tens", "hundreds", "thousands", "mixed"].forEach(k => {
+        const btn = document.getElementById(`lbTab-${k}`);
+        if (k === levelKey) {
+          btn.className = "py-2 px-3 rounded-xl font-black text-xs border-2 bg-amber-400 border-amber-500 text-amber-950 shadow";
+        } else {
+          btn.className = "py-2 px-3 rounded-xl font-black text-xs border-2 bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100";
+        }
+      });
+
+      const top20 = getTop20ForLevel(levelKey);
+      const tbody = document.getElementById("modalLeaderboardBody");
+      tbody.innerHTML = "";
+
+      if (top20.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold">本关暂时还没有挑战记录，快来成为第一名吧！</td></tr>`;
+        return;
+      }
+
+      top20.forEach((row, idx) => {
+        const isMe = studentName &&
+                     row.studentName.trim().toLowerCase() === studentName.trim().toLowerCase() &&
+                     row.studentClass.trim().toLowerCase() === studentClass.trim().toLowerCase();
+
+        const tr = document.createElement("tr");
+        tr.className = isMe ? "bg-amber-100 font-black" : (idx < 3 ? "bg-amber-50/40" : "");
+        tr.innerHTML = `
+          <td class="p-3 text-center font-black">${formatRankBadge(idx + 1)}</td>
+          <td class="p-3 font-black">
+            ${row.studentName}
+            ${isMe ? '<span class="ml-1 text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full">你</span>' : ''}
+          </td>
+          <td class="p-3">${row.studentClass}</td>
+          <td class="p-3 font-black text-amber-900">${Number(row.score).toFixed(1)}%</td>
+          <td class="p-3 text-emerald-700">${row.correctCount || '-'}</td>
+          <td class="p-3 text-slate-600">${Number(row.timeSeconds).toFixed(1)}s</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ==================== 云端上传与拉取全班排行榜 ====================
+    async function uploadScoreAndRefreshLeaderboard() {
+      const scriptUrl = getActiveScriptUrl();
+      const banner = document.getElementById("sheetSyncBanner");
+      const icon = document.getElementById("sheetSyncIcon");
+      const text = document.getElementById("sheetSyncText");
+      const retryBtn = document.getElementById("retrySyncBtn");
+
+      retryBtn.classList.add("hidden");
+
+      if (!scriptUrl) {
+        banner.className = "mt-3 mx-auto max-w-xl rounded-2xl px-4 py-2.5 text-xs md:text-sm font-extrabold flex items-center justify-center gap-2 bg-slate-100 border-2 border-slate-300 text-slate-700";
+        icon.textContent = "ℹ️";
+        text.textContent = "当前显示本机排行榜（老师在「⚙️ 老师设置」绑定 Google Sheet 后即可全班实时排行）";
+        return;
+      }
+
+      banner.className = "mt-3 mx-auto max-w-xl rounded-2xl px-4 py-2.5 text-xs md:text-sm font-extrabold flex items-center justify-center gap-2 bg-amber-50 border-2 border-amber-300 text-amber-900";
+      icon.textContent = "⏳";
+      text.textContent = "正在将成绩上传至 Google Sheet 并同步全班 Top 20 排行榜...";
+
+      try {
+        await fetch(scriptUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(lastCompletedRecord)
+        });
+
+        // 稍候片刻后拉取最新云端排行榜
+        setTimeout(() => {
+          fetchCloudLeaderboards(false);
+        }, 900);
+
+        banner.className = "mt-3 mx-auto max-w-xl rounded-2xl px-4 py-2.5 text-xs md:text-sm font-extrabold flex items-center justify-center gap-2 bg-emerald-100 border-2 border-emerald-400 text-emerald-950";
+        icon.textContent = "✅";
+        text.textContent = "成绩已记录到 Google Sheet，并已刷新本关 Top 20 排行榜！";
+      } catch (err) {
+        banner.className = "mt-3 mx-auto max-w-xl rounded-2xl px-4 py-2.5 text-xs md:text-sm font-extrabold flex items-center justify-center gap-2 bg-rose-100 border-2 border-rose-300 text-rose-900";
+        icon.textContent = "⚠️";
+        text.textContent = "云端同步失败，请检查网络连接。";
+        retryBtn.classList.remove("hidden");
+      }
+    }
+
+    async function fetchCloudLeaderboards(showToast) {
+      const scriptUrl = getActiveScriptUrl();
+      const statusEl = document.getElementById("lbSourceStatus");
+      if (!scriptUrl) {
+        statusEl.textContent = "📊 当前模式：本机排行榜（未绑定云端 Google Sheet）";
+        renderResultLeaderboard();
+        switchLeaderboardTab(activeModalLeaderboardTab);
+        return;
+      }
+
+      statusEl.textContent = "⏳ 正在从 Google Sheet 同步全班最新 Top 20 排行榜...";
+      try {
+        const res = await fetch(`${scriptUrl}?action=leaderboard&t=${Date.now()}`);
+        const data = await res.json();
+        if (data && data.leaderboards) {
+          cloudLeaderboards = data.leaderboards;
+          statusEl.textContent = "✅ 已同步 Google Sheet 云端实时排行榜";
+          renderResultLeaderboard();
+          switchLeaderboardTab(activeModalLeaderboardTab);
+        }
+      } catch (e) {
+        statusEl.textContent = "ℹ️ 显示本地缓存排行榜（请确认 Apps Script 已更新支持 doGet）";
+        renderResultLeaderboard();
+        switchLeaderboardTab(activeModalLeaderboardTab);
+      }
+    }
+
+    function replaySameLevel() {
+      startLevel(currentLevelKey);
+    }
+
+    function backToLevelMap() {
+      showScreen("screen-levels");
+    }
+
+    // ==================== 本地存储与老师管理 ====================
+    function saveRecordLocally(rec) {
+      const list = JSON.parse(localStorage.getItem("rounding_game_records") || "[]");
+      list.unshift(rec);
+      localStorage.setItem("rounding_game_records", JSON.stringify(list));
+    }
+
+    function saveScriptUrl() {
+      const val = document.getElementById("inputScriptUrl").value.trim();
+      localStorage.setItem("rounding_game_script_url", val);
+      const msg = document.getElementById("scriptSaveMsg");
+      msg.textContent = "✅ 网址已保存！正在同步云端排行榜...";
+      msg.className = "text-xs font-bold mt-2 text-emerald-700";
+      msg.classList.remove("hidden");
+      fetchCloudLeaderboards(true);
+    }
+
+    function exportLocalCSV() {
+      const list = JSON.parse(localStorage.getItem("rounding_game_records") || "[]");
+      if (list.length === 0) {
+        alert("目前本机还没有成绩记录可导出！");
+        return;
+      }
+      const headers = ["提交时间", "学生姓名", "班级", "挑战关卡", "综合总分(%)", "准确率得分(%)", "速度奖励分(%)", "答对题数", "总用时(秒)", "错题详情"];
+      const rows = list.map(r => [
+        `"${r.timestamp}"`,
+        `"${r.studentName}"`,
+        `"${r.studentClass}"`,
+        `"${r.levelName}"`,
+        r.score,
+        r.accuracyScore || "",
+        r.speedScore || "",
+        `"${r.correctCount}"`,
+        r.timeSeconds,
+        `"${r.wrongDetails}"`
+      ].join(","));
+
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `三年级近似值竞技成绩单_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+    }
+
+    function clearLocalRecords() {
+      if (confirm("确定要清空本设备保存的本地历史记录吗？（不会删除 Google Sheet 云端数据）")) {
+        localStorage.removeItem("rounding_game_records");
+        renderResultLeaderboard();
+        switchLeaderboardTab(activeModalLeaderboardTab);
+      }
+    }
+
+    function openModal(id) {
+      const el = document.getElementById(id);
+      el.classList.remove("hidden");
+      el.classList.add("flex");
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      el.classList.add("hidden");
+      el.classList.remove("flex");
+    }
+  </script>
+</body>
+</html>
